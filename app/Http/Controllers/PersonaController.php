@@ -79,7 +79,7 @@ class PersonaController extends Controller
      */
     public function show(string $id)
     {
-        $persona = Persona::where('persona_id', $id)->orWhere('id', $id)->firstOrFail();
+        $persona = Persona::findOrFail($id);
         return view('personas.show', compact('persona'));
     }
 
@@ -88,7 +88,7 @@ class PersonaController extends Controller
      */
     public function edit(string $id)
     {
-        $persona = Persona::where('persona_id', $id)->orWhere('id', $id)->firstOrFail();
+        $persona = Persona::findOrFail($id);
         return view('personas.edit', compact('persona'));
     }
 
@@ -99,11 +99,11 @@ class PersonaController extends Controller
     {
         $request->validate([
             'nombre' => 'required|string|max:255',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:persona,email,' . $id . ',persona_id',
             'foto' => 'nullable|image|max:2048',
         ]);
 
-        $persona = Persona::where('persona_id', $id)->orWhere('id', $id)->firstOrFail();
+        $persona = Persona::findOrFail($id);
 
         $full = trim($request->input('nombre'));
         $parts = preg_split('/\s+/', $full);
@@ -138,13 +138,30 @@ class PersonaController extends Controller
      */
     public function destroy(string $id)
     {
-        $persona = Persona::where('persona_id', $id)->orWhere('id', $id)->firstOrFail();
-        if (!empty($persona->foto_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($persona->foto_path)) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($persona->foto_path);
-        }
-        $persona->delete();
+        try {
+            $persona = Persona::findOrFail($id);
+            
+            // Delete the photo if exists
+            if (!empty($persona->foto_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($persona->foto_path)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($persona->foto_path);
+            }
+            
+            // Delete the persona
+            $persona->delete();
 
-        return redirect()->route('personas.index')
-            ->with('success', 'Persona eliminada exitosamente.');
+            return redirect()->route('personas.index')
+                ->with('success', 'Persona eliminada exitosamente.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Handle foreign key constraint errors
+            if ($e->getCode() == '23000') {
+                return redirect()->route('personas.index')
+                    ->with('error', 'No se puede eliminar esta persona porque está relacionada con proyectos u otros registros.');
+            }
+            return redirect()->route('personas.index')
+                ->with('error', 'Error al eliminar la persona: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            return redirect()->route('personas.index')
+                ->with('error', 'Error inesperado al eliminar la persona.');
+        }
     }
 }

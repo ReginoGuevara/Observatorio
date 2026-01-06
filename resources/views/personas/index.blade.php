@@ -21,6 +21,13 @@
                         </div>
                     @endif
                     
+                    @if(session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ session('error') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    
                     <div class="table-responsive">
                         <div class="mb-3 d-flex">
                             <form method="GET" action="{{ route('personas.index') }}" class="me-2">
@@ -45,7 +52,7 @@
                             <tbody>
                                 @forelse($personas as $persona)
                                     <tr>
-                                        <td>{{ $persona->persona_id ?? $persona->id }}</td>
+                                        <td>{{ $persona->persona_id }}</td>
                                         <td>
                                             @if(!empty($persona->foto_path))
                                                 <img src="{{ asset('storage/'.$persona->foto_path) }}" alt="foto" style="width:40px;height:40px;object-fit:cover;border-radius:4px;">
@@ -57,7 +64,9 @@
                                         <td>{{ $persona->email }}</td>
                                         <td>{{ $persona->telefono }}</td>
                                         <td>
-                                            <a href="{{ route('personas.show', $persona->persona_id ?? $persona->id) }}" class="btn btn-sm btn-outline-primary">Ver</a>
+                                            <a href="{{ route('personas.show', $persona->persona_id) }}" class="btn btn-sm btn-outline-primary">Ver</a>
+                                            <a href="{{ route('personas.edit', $persona->persona_id) }}" class="btn btn-sm btn-outline-secondary ms-1">Editar</a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger ms-1" onclick="eliminarPersona({{ $persona->persona_id }})">Eliminar</button>
                                         </td>
                                     </tr>
                                 @empty
@@ -79,4 +88,20 @@
         </div>
     </div>
 </div>
+
+<!-- Formulario oculto para eliminar -->
+<form id="deleteForm" method="POST" style="display:none;">
+    @csrf
+    @method('DELETE')
+</form>
+
+<script>
+function eliminarPersona(id) {
+    if (confirm('¿Eliminar persona? Esta acción no se puede deshacer.')) {
+        const form = document.getElementById('deleteForm');
+        form.action = "{{ route('personas.destroy', ':id') }}".replace(':id', id);
+        form.submit();
+    }
+}
+</script>
 @endsection

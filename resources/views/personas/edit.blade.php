@@ -11,7 +11,7 @@
                     <h4><i class="bi bi-pencil-square"></i> Editar Investigador</h4>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('personas.update', $persona->persona_id ?? $persona->id) }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('personas.update', $persona->persona_id) }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 

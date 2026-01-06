@@ -10,7 +10,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4><i class="bi bi-person"></i> {{ $persona->nombres }} {{ $persona->apellidos }}</h4>
                     <div>
-                        <a href="{{ route('personas.edit', $persona->persona_id ?? $persona->id) }}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                        <a href="{{ route('personas.edit', $persona->persona_id) }}" class="btn btn-sm btn-outline-secondary">Editar</a>
                         <a href="{{ route('personas.index') }}" class="btn btn-sm btn-secondary">Volver</a>
                     </div>
                 </div>
