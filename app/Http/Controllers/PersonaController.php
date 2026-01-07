@@ -164,4 +164,58 @@ class PersonaController extends Controller
                 ->with('error', 'Error inesperado al eliminar la persona.');
         }
     }
+
+    /**
+     * Export personas as CSV
+     */
+    public function exportCsv()
+    {
+        $personas = Persona::all();
+        
+        $filename = 'personas_' . date('Y-m-d_H-i-s') . '.csv';
+        $headers = array(
+            "Content-type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        );
+
+        $columns = array('ID', 'Nombres', 'Apellidos', 'Email', 'Teléfono', 'Cargo', 'Creado');
+
+        $callback = function() use($personas, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach($personas as $persona) {
+                fputcsv($file, array(
+                    $persona->persona_id,
+                    $persona->nombres,
+                    $persona->apellidos,
+                    $persona->email,
+                    $persona->telefono,
+                    $persona->cargo,
+                    $persona->created_at
+                ));
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export personas as PDF
+     */
+    public function exportPdf()
+    {
+        $personas = Persona::all();
+        
+        // Para generar PDF, necesitarías instalar dompdf o similar
+        // Por ahora retornamos un mensaje
+        return response()->json([
+            'message' => 'Funcionalidad de PDF en desarrollo',
+            'info' => 'Instala: composer require barryvdh/laravel-dompdf'
+        ]);
+    }
 }

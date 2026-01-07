@@ -58,6 +58,21 @@ class ProyectoController extends Controller
     }
 
     /**
+     * Export proyectos to PDF
+     */
+    public function exportPdf()
+    {
+        $proyectos = Proyecto::all();
+        
+        // Para generar PDF, necesitarías instalar dompdf o similar
+        // Por ahora retornamos un mensaje
+        return response()->json([
+            'message' => 'Funcionalidad de PDF en desarrollo',
+            'info' => 'Instala: composer require barryvdh/laravel-dompdf'
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
